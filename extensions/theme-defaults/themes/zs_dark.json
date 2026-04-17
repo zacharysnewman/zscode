@@ -1,0 +1,32 @@
+{
+	"$schema": "vscode://schemas/color-theme",
+	"name": "ZS Dark",
+	"include": "./dark_modern.json",
+	"colors": {
+		"activityBar.activeBorder": "#16a34a",
+		"activityBarBadge.background": "#16a34a",
+		"activityBarBadge.foreground": "#ffffff",
+		"button.background": "#16a34a",
+		"button.foreground": "#ffffff",
+		"button.hoverBackground": "#15803d",
+		"chat.slashCommandBackground": "#16a34a33",
+		"chat.slashCommandForeground": "#86efac",
+		"editorGutter.modifiedBackground": "#16a34a",
+		"editorLink.activeForeground": "#22c55e",
+		"focusBorder": "#22c55e",
+		"notificationLink.foreground": "#22c55e",
+		"panelTitle.activeBorder": "#16a34a",
+		"pickerGroup.foreground": "#22c55e",
+		"progressBar.background": "#16a34a",
+		"statusBar.debuggingBackground": "#16a34a",
+		"statusBar.focusBorder": "#22c55e",
+		"statusBarItem.focusBorder": "#22c55e",
+		"statusBarItem.remoteBackground": "#16a34a",
+		"statusBarItem.remoteForeground": "#ffffff",
+		"tab.activeBorderTop": "#16a34a",
+		"terminal.tab.activeBorder": "#16a34a",
+		"textLink.activeForeground": "#15803d",
+		"textLink.foreground": "#22c55e",
+		"welcomePage.progress.foreground": "#16a34a"
+	}
+}
