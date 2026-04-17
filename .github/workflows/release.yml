@@ -28,6 +28,8 @@ jobs:
           cache: npm
 
       - name: Install dependencies
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python3 -m pip install --break-system-packages setuptools || true
           npm ci
