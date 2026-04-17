@@ -65,6 +65,41 @@ MANDATORY: Always check for compilation errors before running any tests or valid
 - Use the run test tool if you need to run tests. If that tool is not available, then you can use `scripts/test.sh` (or `scripts\test.bat` on Windows) for unit tests (add `--grep <pattern>` to filter tests) or `scripts/test-integration.sh` (or `scripts\test-integration.bat` on Windows) for integration tests (integration tests end with .integrationTest.ts or are in /extensions/).
 - Use `npm run valid-layers-check` to check for layering issues
 
+## Running a local rebuild (desktop + web dev server)
+
+This is the canonical sequence to rebuild this repo and see changes reflected in the localhost:8080 web dev server (and any other run target).
+
+### Gotcha: Node 22 is required
+The repo's `.nvmrc` pins **Node 22.22.1**. The gulpfiles are authored in TypeScript (`build/gulpfile.ts`, `build/next/index.ts`), and Node 22+ is required for native `.ts` ESM support. Under Node 20 the build fails immediately with `ERR_UNKNOWN_FILE_EXTENSION` on the gulpfiles.
+
+Claude's shell starts on the system default Node (often 20). Fix by prepending Node 22 to `PATH` for the whole command — NOT just by invoking npm via its absolute path. `npm-run-all2` (used by `npm run watch`) spawns children that resolve `node` via `PATH`, so child processes will still fall back to Node 20 if only the parent has Node 22.
+
+```bash
+PATH="$HOME/.nvm/versions/node/v22.22.1/bin:$PATH" npm run watch
+```
+
+### What each watch target actually does
+- **`npm run watch`** — the canonical one. Runs four tasks in parallel (via `npm-run-all2 -lp`): `watch-client-transpile`, `watch-client`, `watch-extensions`, `watch-copilot`.
+- **`npm run watch-client-transpile`** — esbuild transpile `src/` → `out/*.js`. **This is the task that actually emits the JS the dev server serves.** Initial build ~5 seconds.
+- **`npm run watch-client`** — TypeScript typecheck only (`noEmit: true` under `useEsbuildTranspile = true` in `build/buildConfig.ts`). Initial typecheck ~45-50 seconds. Does NOT emit.
+- **`npm run watch-extensions`** — builds files under `extensions/`.
+- **`npm run watch-web`** — misleading name: only builds **web extensions** (extensions that run in the browser), NOT the workbench core. Don't rely on this for `src/` changes.
+
+### CSS & non-TS resource gotcha
+`watch-client-transpile` copies non-TS files (CSS, media, etc.) from `src/` → `out/` ONCE at the start of the watch (it prints `[resources] Copying all non-TS files to out...`), but does NOT re-copy them when they change. If you edit a `.css` file mid-session:
+- either restart `npm run watch`, or
+- `cp src/<path-to-file>.css out/<path-to-file>.css` manually.
+
+### Dev web server
+`localhost:8080` is served by `@vscode/test-web` (`node_modules/@vscode/test-web/out/server/index.js`), pointed at `--sourcesPath /Users/znewman/indeed/vscode`. It reads the built `out/` files directly, so once `watch-client-transpile` has emitted, just reload the browser to pick up changes. No separate server rebuild needed.
+
+### Quick diagnostic: are my edits actually in `out/`?
+When a change doesn't appear, check the `out/` file timestamp against the `src/` timestamp:
+```bash
+ls -la out/vs/<path>.js src/vs/<path>.ts
+```
+If `out/` is older than `src/`, the transpile watch isn't running (or is stuck) — see the Node 22 gotcha above.
+
 ## Coding Guidelines
 
 ### Indentation
