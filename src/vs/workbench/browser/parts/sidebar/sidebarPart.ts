@@ -33,6 +33,7 @@ import { ToggleActivityBarVisibilityActionId } from '../../actions/layoutActions
 import { localize2 } from '../../../../nls.js';
 import { IHoverService } from '../../../../platform/hover/browser/hover.js';
 import { VisibleViewContainersTracker } from '../visibleViewContainersTracker.js';
+import { Codicon } from '../../../../base/common/codicons.js';
 import { Extensions } from '../../panecomposite.js';
 
 export class SidebarPart extends AbstractPaneCompositePart {
@@ -217,6 +218,8 @@ export class SidebarPart extends AbstractPaneCompositePart {
 			compositeSize: 0,
 			iconSize: 16,
 			overflowActionSize: 30,
+			maxVisibleItems: 4,
+			overflowIcon: Codicon.chevronDown,
 			colors: theme => ({
 				activeBackgroundColor: theme.getColor(SIDE_BAR_BACKGROUND),
 				inactiveBackgroundColor: theme.getColor(SIDE_BAR_BACKGROUND),

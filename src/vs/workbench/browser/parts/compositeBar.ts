@@ -22,6 +22,7 @@ import { IComposite } from '../../common/composite.js';
 import { CompositeDragAndDropData, CompositeDragAndDropObserver, IDraggedCompositeData, ICompositeDragAndDrop, Before2D, toggleDropEffect, ICompositeDragAndDropObserverCallbacks } from '../dnd.js';
 import { Gesture, EventType as TouchEventType, GestureEvent } from '../../../base/browser/touch.js';
 import { MutableDisposable } from '../../../base/common/lifecycle.js';
+import { ThemeIcon } from '../../../base/common/themables.js';
 
 export interface ICompositeBarItem {
 
@@ -148,6 +149,8 @@ export interface ICompositeBarOptions {
 	readonly dndHandler: ICompositeDragAndDrop;
 	readonly activityHoverOptions: IActivityHoverOptions;
 	readonly preventLoopNavigation?: boolean;
+	readonly maxVisibleItems?: number;
+	readonly overflowIcon?: ThemeIcon;
 
 	readonly getActivityAction: (compositeId: string) => CompositeBarAction;
 	readonly getCompositePinnedAction: (compositeId: string) => IAction;
@@ -547,6 +550,13 @@ export class CompositeBar extends Widget implements ICompositeBar {
 			size += compositeSize;
 		}
 
+		// Cap the number of inline composites so only N fit before overflowing
+		if (this.options.maxVisibleItems !== undefined && maxVisible > this.options.maxVisibleItems) {
+			size -= compositesToShow.slice(this.options.maxVisibleItems, maxVisible)
+				.reduce((total, id) => total + this.compositeSizeInBar.get(id)!, 0);
+			maxVisible = this.options.maxVisibleItems;
+		}
+
 		// Remove the tail of composites that did not fit
 		if (totalComposites > maxVisible) {
 			compositesToShow = compositesToShow.slice(0, maxVisible);
@@ -616,7 +626,7 @@ export class CompositeBar extends Widget implements ICompositeBar {
 		if (totalComposites > compositesToShow.length && !this.compositeOverflowAction.value) {
 			this.compositeOverflowAction.value = this.instantiationService.createInstance(CompositeOverflowActivityAction, () => {
 				this.compositeOverflowActionViewItem.value?.showMenu();
-			});
+			}, this.options.overflowIcon);
 			this.compositeOverflowActionViewItem.value = this.instantiationService.createInstance(
 				CompositeOverflowActivityActionViewItem,
 				this.compositeOverflowAction.value,

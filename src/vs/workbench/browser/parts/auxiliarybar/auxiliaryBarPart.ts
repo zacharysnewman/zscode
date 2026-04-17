@@ -33,6 +33,7 @@ import { IConfigurationService } from '../../../../platform/configuration/common
 import { getContextMenuActions } from '../../../../platform/actions/browser/menuEntryActionViewItem.js';
 import { IHoverService } from '../../../../platform/hover/browser/hover.js';
 import { VisibleViewContainersTracker } from '../visibleViewContainersTracker.js';
+import { Codicon } from '../../../../base/common/codicons.js';
 import { Extensions } from '../../panecomposite.js';
 
 interface IAuxiliaryBarPartConfiguration {
@@ -215,6 +216,8 @@ export class AuxiliaryBarPart extends AbstractPaneCompositePart {
 			iconSize: 16,
 			// Add 10px spacing if the overflow action is visible to no confuse the user with ... between the toolbars
 			get overflowActionSize() { return $this.getCompositeBarPosition() === CompositeBarPosition.TITLE ? 40 : 30; },
+			get maxVisibleItems() { return $this.getCompositeBarPosition() === CompositeBarPosition.TITLE ? undefined : 4; },
+			get overflowIcon() { return $this.getCompositeBarPosition() === CompositeBarPosition.TITLE ? undefined : Codicon.chevronDown; },
 			colors: theme => ({
 				activeBackgroundColor: theme.getColor(SIDE_BAR_BACKGROUND),
 				inactiveBackgroundColor: theme.getColor(SIDE_BAR_BACKGROUND),
