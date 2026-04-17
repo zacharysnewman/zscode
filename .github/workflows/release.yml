@@ -35,6 +35,8 @@ jobs:
           npm ci
 
       - name: Build (compile + package arm64 minified)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run gulp vscode-darwin-arm64-min
 
       - name: Package .app into zip
