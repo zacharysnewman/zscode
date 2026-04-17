@@ -1,0 +1,65 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-darwin-arm64:
+    name: macOS arm64
+    runs-on: macos-14
+    env:
+      NPM_ARCH: arm64
+      VSCODE_ARCH: arm64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          lfs: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --break-system-packages setuptools || true
+          npm ci
+
+      - name: Build (compile + package arm64 minified)
+        run: npm run gulp vscode-darwin-arm64-min
+
+      - name: Package .app into zip
+        run: |
+          set -e
+          cd ..
+          ls -d VSCode-darwin-arm64
+          ditto -c -k --sequesterRsrc --keepParent "VSCode-darwin-arm64/ZS Code.app" "${GITHUB_WORKSPACE}/ZS-Code-${GITHUB_REF_NAME}-darwin-arm64.zip"
+          ls -la "${GITHUB_WORKSPACE}/ZS-Code-${GITHUB_REF_NAME}-darwin-arm64.zip"
+
+      - name: Create GitHub Release and upload asset
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ZS Code ${{ github.ref_name }}
+          body: |
+            Custom VS Code fork — macOS arm64.
+
+            **Install:** download the zip, unzip, drag `ZS Code.app` to `/Applications`.
+            **First launch:** macOS Gatekeeper will warn because the build is unsigned. Right-click the app → Open → Open. Only needed once.
+
+            ## What's in this build
+            - Cursor-style horizontal activity bar at the top of the sidebar (4-icon cap, chevron overflow)
+            - Green accents baked in via the default **ZS Dark** theme
+            - Rebrand to **ZS Code** (name, icon, data folder)
+            - Sparkle icon on the Welcome tab
+
+            Built from tag `${{ github.ref_name }}`.
+          files: ZS-Code-${{ github.ref_name }}-darwin-arm64.zip
+          draft: false
+          prerelease: false
